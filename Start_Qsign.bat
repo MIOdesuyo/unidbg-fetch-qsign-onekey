@@ -1,26 +1,32 @@
 @echo off
 setlocal enabledelayedexpansion
 set JAVA_HOME=.\jre
-set "ver=1.1.3"
+set "ver=1.1.7"
 set "library=txlib/"
-set "txlib_version=8.9.63"
-set "json_file=%library%%txlib_version%/config.json"
 set "config_file=config.yml"
 set "account=1233456"
 set "password="
+if not exist "txlib_version.json" (
+	REM txlib_version_config_file does not exist.
+) else ( 
+for /F "delims=" %%D in ('lib\jq.exe -r ".txlib_version" txlib_version.json') do set "txlib_version=%%D" 
+)
 
-if not exist "%json_file%" (
+set "json_file=%library%%txlib_version%/config.json"
+
+if not exist "txlib_version.json" (
   echo ---------------------------------------------------------------
-  echo Default txlib_ Version is %txlib_version%
-  echo If you want to change it, please write it to this bat file.
+  echo unidbg-fetch-qsign-onekey Ver.%ver%
   echo txlib_version_config_file does not exist.
   echo Please enter an option to save. 
   echo If you press enter directly, save the default values.
   echo ---------------------------------------------------------------
-  REM set /p "txlib_version=txlib_version(default:8.9.63 optional:8.9.68): "
-  REM     if "!txlib_version!"=="" (
-  REM     set "txlib_version=8.9.63"
-  REM     )
+  set /p "txlib_version=txlib_version(optional:8.9.58/8.9.63(default)/8.9.68/8.9.70): "
+       if "!txlib_version!"=="" (
+	   set "txlib_version=8.9.63"
+       )  
+  set "json_file=%library%!txlib_version!/config.json"
+  
   set /p "host=host(default:127.0.0.1): "
       if "!host!"=="" (
       set "host=127.0.0.1"
@@ -33,24 +39,50 @@ if not exist "%json_file%" (
       if "!key!"=="" (
       set "key=1145141919810"
       )
-if "%txlib_version%"=="8.9.63" (
-    echo { "server": { "host": "%host%", "port": %port% }, "key": "%key%", "auto_register": false, "reload_interval": 40, "protocol": { "qua": "V1_AND_SQ_8.9.63_4194_YYB_D", "version": "8.9.63", "code": "4194" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "%json_file%"
-)
 
-if "%txlib_version%"=="8.9.68" (
-    echo { "server": { "host": "%host%", "port": %port% }, "key": "%key%", "auto_register": false, "reload_interval": 40, "protocol": { "qua": "V1_AND_SQ_8.9.68_4218_HDBM_T", "version": "8.9.68", "code": "4218" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "%json_file%"
-)
-  if "%txlib_version%" neq "8.9.63" (
-      if "%txlib_version%" neq "8.9.68" (
-        echo Warning: Wrong txlib_ Version. Please enter the correct protocol version number!
-        timeout 10
-        exit /b
-      )
+  if "!txlib_version!"=="8.9.58" (
+    echo { "server": { "host": "!host!", "port": !port! }, "key": "!key!", "auto_register": true, "protocol": { "qua": "V1_AND_SQ_8.9.58_4106_YYB_D", "version": "8.9.58", "code": "4106" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "!json_file!"
+	  echo {"txlib_version": "8.9.58"} > txlib_version.json
+	)
+
+  if "!txlib_version!"=="8.9.63" (
+    echo { "server": { "host": "!host!", "port": !port! }, "key": "!key!", "auto_register": true, "protocol": { "qua": "V1_AND_SQ_8.9.63_4194_YYB_D", "version": "8.9.63", "code": "4194" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "!json_file!"
+	  echo {"txlib_version": "8.9.63"} > txlib_version.json
+	)
+
+  if "!txlib_version!"=="8.9.68" (
+	  echo { "server": { "host": "!host!", "port": !port! }, "key": "!key!", "auto_register": true, "protocol": { "qua": "V1_AND_SQ_8.9.68_4264_YYB_D", "version": "8.9.68", "code": "4264" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "!json_file!"
+	  echo {"txlib_version": "8.9.68"} > txlib_version.json
     )
-) else (
+	
+  if "!txlib_version!"=="8.9.70" (
+    echo { "server": { "host": "!host!", "port": !port! }, "key": "!key!", "auto_register": true, "protocol": { "qua": "V1_AND_SQ_8.9.70_4330_YYB_D", "version": "8.9.70", "code": "4330" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "!json_file!"
+	  echo {"txlib_version": "8.9.70"} > txlib_version.json
+	)
+	
+REM  WHO HAVE 8.9.73 PROTOCOL? I'M LAZY TO UNPACK!
+REM  if "!txlib_version!"=="8.9.73" (
+REM    echo { "server": { "host": "!host!", "port": !port! }, "key": "!key!", "auto_register": true, "protocol": { "qua": "V1_AND_SQ_8.9.70_4330_YYB_D", "version": "8.9.70", "code": "4330" }, "unidbg": { "dynarmic": false, "unicorn": true, "debug": false } } > "!json_file!"
+REM	  echo {"txlib_version": "8.9.73"} > txlib_version.json
+REM	)
+  if "!txlib_version!" neq "8.9.58" (
+    if "!txlib_version!" neq "8.9.63" (
+        if "!txlib_version!" neq "8.9.68" (
+          if "!txlib_version!" neq "8.9.70" (
+            echo Warning: Wrong txlib_ Version. The protocol must be 8.9.58/8.9.63/8.9.68/8.9.70
+            timeout 10
+            exit /b
+          )
+        )
+      )
+  )
+) else (   
+  for /F "delims=" %%D in ('lib\jq.exe -r ".txlib_version" txlib_version.json') do set "txlib_version=%%D"
+  set "json_file=%library%!txlib_version!/config.json"
   echo ---------------------------------------------------------------
-  echo txlib_version_config_file exists. 
-  echo If you want to rewrite the config.json , please delete it!
+  echo unidbg-fetch-qsign-onekey Ver.%ver%
+  echo txlib_Version is %txlib_version%
+  echo If you want to change txlib_version , please delete [txlib_version.json]!
   echo ---------------------------------------------------------------
   for /F "delims=" %%A in ('lib\jq.exe -r ".server.host" %json_file%') do set "host=%%A"
   for /F "delims=" %%B in ('lib\jq.exe -r ".server.port" %json_file%') do set "port=%%B"
@@ -60,7 +92,11 @@ if "%txlib_version%"=="8.9.68" (
 
 if exist "%config_file%" (
   lib\sed.exe -i "/# sign-server:/d" "%config_file%"
-  lib\sed.exe -i "s/sign-server:.*/sign-server: http:\/\/!host!:!port!/g; s/key:.*/key: !key!/g" "%config_file%"
+  if "!host!"=="0.0.0.0" (
+    lib\sed.exe -i "s/sign-server:.*/sign-server: 'http:\/\/localhost:!port!'/g; s/key:.*/key: '!key!'/g" "%config_file%"
+    ) else ( 
+    lib\sed.exe -i "s/sign-server:.*/sign-server: 'http:\/\/!host!:!port!'/g; s/key:.*/key: '!key!'/g" "%config_file%"
+    )
 ) else (
   echo Run separately from go-cqhttp. Please enter the sign-server address and KEY in go-cqhttp config.
 )
